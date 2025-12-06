@@ -1,9 +1,9 @@
 # Infrastructure Deployment Project
 
-Welcome to my DevOps practical assignment submission. I've built a robust, production-grade infrastructure pipeline to deploy a specific Node.js REST API on AWS using Terraform.
+This is my DevOps practical assignment submission. I've built this infrastructure pipeline to deploy a specific Node.js REST API on AWS using Terraform.
 
 ## Why Terraform?
-I chose **Terraform** over CloudFormation because it's the industry standard for cloud-agnostic Infrastructure as Code. It offers cleaner state management and modularity, which I believe is critical for maintaining long-term projects.
+I chose **Terraform** over CloudFormation because it's the industry standard for cloud-agnostic Infrastructure as Code. It offers cleaner state management and modularity, which I think is critical for maintaining long-term projects.
 
 ## Codebase Organization
 Here is how I structured the project:
@@ -22,7 +22,7 @@ I focused heavily on security best practices:
 ---
 
 ## ⚙️ Project Configuration
-If you are setting this up in a **new AWS account** (or for the interview demo), please follow these one-time configuration steps.
+If you are setting this up in a **new AWS account**, you can follow these one-time configuration steps.
 
 ### 1. Configure AWS Credentials (Local)
 Ensure you have an IAM User with Administrator Access configured locally.
@@ -52,23 +52,23 @@ This creates an S3 bucket to store the Terraform state file, allowing GitHub Act
 
 ---
 
-## 🚀 How to Deploy
+## How to Deploy
 
-### Option 1: The "DevOps" Way (GitHub Actions)
+### Option 1: Using the GitHub Actions
 This is the preferred method as it simulates a real production environment.
 1.  Push a commit to the `main` branch.
 2.  Go to the **Actions** tab in GitHub.
 3.  Watch the **Infrastructure Pipeline** run. It will plan and apply the changes automatically.
 
-### Option 2: The "Manual" Way (Local)
+### Option 2: Using your Local system
 If you want to test rapidly from your machine:
 ```bash
 ./scripts/deploy.sh
 ```
-This script wraps the terraform commands for convenience.
+This script contians the terraform commands for convenience.
 
-## 💥 Teardown (Important!)
-To ensure you aren't charged for running instances, you can destroy everything easily.
+## Teardown
+To ensure I shouldn't be charged for running instances, I can destroy everything easily.
 
 **Via GitHub Actions:**
 1.  Go to **Actions** -> **Infrastructure Pipeline** -> **Run workflow**.
@@ -80,4 +80,5 @@ To ensure you aren't charged for running instances, you can destroy everything e
 ```
 
 ---
-*Thank you for reviewing my assignment!*
+
+<img width="1233" height="415" alt="image" src="https://github.com/user-attachments/assets/c0f3ec41-bdea-4f54-98d7-4296fcd29e07" />
