@@ -1,50 +1,83 @@
 # Infrastructure Deployment Project
 
-This repo contains the work for the DevOps practical assignment. I've built a complete pipeline to deploy a Node.js REST API on AWS using Terraform.
+Welcome to my DevOps practical assignment submission. I've built a robust, production-grade infrastructure pipeline to deploy a specific Node.js REST API on AWS using Terraform.
 
-## What's in here?
+## Why Terraform?
+I chose **Terraform** over CloudFormation because it's the industry standard for cloud-agnostic Infrastructure as Code. It offers cleaner state management and modularity, which I believe is critical for maintaining long-term projects.
 
-I decided to use **Terraform** for this because it's effectively the industry standard and allows for much cleaner state management than CloudFormation.
+## Codebase Organization
+Here is how I structured the project:
 
-The project is broken down like this:
-
-*   **`terraform/`**: All the infrastructure code. I set up a custom VPC, an Application Load Balancer (ALB), and an Auto Scaling Group (ASG).
-*   **`app/`**: A simple Node.js application I wrote to test the deployment. It just responds with the hostname so we can see load balancing in action.
-*   **`scripts/`**: Some helper scripts I wrote to make deploying easier (so you don't have to remember the full terraform commands).
-*   **`.github/`**: The CI/CD pipeline. I set up OpenID Connect (OIDC) so GitHub can talk to AWS securely without us having to pass hardcoded keys around.
+*   **`terraform/`**: The core infrastructure logic. I implemented a custom VPC, an Application Load Balancer (ALB), and an Auto Scaling Group (ASG) from scratch.
+*   **`app/`**: A lightweight Node.js application I wrote to verify the deployment. It echoes the hostname so we can validate that load balancing is actually working.
+*   **`scripts/`**: Helper scripts I created to simplify common tasks like deploying, destroying, and setting up the backend.
+*   **`.github/`**: The CI/CD pipelines. I configured OpenID Connect (OIDC) to allow GitHub to deploy securely to AWS without storing long-lived access keys.
 
 ## Architecture Highlights
+I focused heavily on security best practices:
+1.  **True Isolation**: The application servers run in **Private Subnets** with no public IP addresses. They are completely unreachable from the internet directly.
+2.  **Controlled Access**: The only entry point is the Load Balancer, placed in the Public Subnets.
+3.  **Zero-Touch Provisioning**: The instances boot up, install dependencies, and start the app automatically using Terraform's `user_data`.
 
-I focused heavily on security and "correctness" for this setup:
-1.  **Isolation**: The actual servers run in **Private Subnets**. They have no public IP addresses. No one can hit them directly from the internet.
-2.  **Traffic Flow**: The only way in is through the Load Balancer, which lives in the Public Subnets.
-3.  **Zero-Touch Config**: The server boots up, installs software, and starts the app automatically using what's called "User Data".
+---
 
-## How to Deploy / Test
+## ⚙️ Project Configuration
+If you are setting this up in a **new AWS account** (or for the interview demo), please follow these one-time configuration steps.
 
-You have two ways to run this.
-
-### Method 1: The "I want to see it now" way (Local)
-If you have your AWS Access Keys on your machine (like via `aws configure`), you can just run the script:
-
+### 1. Configure AWS Credentials (Local)
+Ensure you have an IAM User with Administrator Access configured locally.
 ```bash
-./scripts/deploy.sh
+aws configure
+# Enter Access Key ID, Secret Access Key, and Region (us-east-1)
 ```
 
-It'll take about 2-3 minutes. When it's done, it gives you a URL.
-If you `curl` that URL, you'll see the response from the internal server.
-
-### Method 2: The "DevOps" way (GitHub Actions)
-
-**Prerequisite: One-Time OIDC Setup**
-Since we don't want the authentication role to be deleted when we destroy the infra, we set it up separately.
-
-1.  Run the setup script (requires AWS CLI configured):
+### 2. Setup GitHub OIDC (One-Time)
+This establishes trust between GitHub and AWS so the CI/CD pipeline works securely.
+1.  Open `scripts/setup_oidc.sh` and check the `GITHUB_ORG`/`GITHUB_REPO` variables.
+2.  Run the script:
     ```bash
     ./scripts/setup_oidc.sh
     ```
-2.  Copy the **Role ARN** output.
-3.  Go to GitHub Repo -> Settings -> Secrets -> Actions.
-4.  Add a secret named `ACTIONS_ROLE_ARN` with that value.
+3.  Copy the **Role ARN** output and add it as a Repository Secret named `ACTIONS_ROLE_ARN` in GitHub.
 
-Now, every time you push to `main`, GitHub will assume that role and deploy.
+### 3. Setup Remote Backend (One-Time)
+This creates an S3 bucket to store the Terraform state file, allowing GitHub Actions to track resources.
+1.  Run the backend setup script:
+    ```bash
+    ./scripts/setup_backend.sh
+    ```
+2.  Copy the generated Bucket Name (e.g., `devops-assignment-state-123...`).
+3.  Open `terraform/backend.tf` and update the `bucket` field.
+4.  Commit and push this change to GitHub.
+
+---
+
+## 🚀 How to Deploy
+
+### Option 1: The "DevOps" Way (GitHub Actions)
+This is the preferred method as it simulates a real production environment.
+1.  Push a commit to the `main` branch.
+2.  Go to the **Actions** tab in GitHub.
+3.  Watch the **Infrastructure Pipeline** run. It will plan and apply the changes automatically.
+
+### Option 2: The "Manual" Way (Local)
+If you want to test rapidly from your machine:
+```bash
+./scripts/deploy.sh
+```
+This script wraps the terraform commands for convenience.
+
+## 💥 Teardown (Important!)
+To ensure you aren't charged for running instances, you can destroy everything easily.
+
+**Via GitHub Actions:**
+1.  Go to **Actions** -> **Infrastructure Pipeline** -> **Run workflow**.
+2.  Select **destroy** from the dropdown menu and run it.
+
+**Via Local Terminal:**
+```bash
+./scripts/destroy.sh
+```
+
+---
+*Thank you for reviewing my assignment!*
